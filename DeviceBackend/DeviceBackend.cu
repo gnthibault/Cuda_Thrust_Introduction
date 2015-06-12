@@ -29,7 +29,7 @@ int main( int argc, char* argv[] )
 	//Declare and allocate memory for device vector
 	thrust::device_vector<float> deviceVector(sizeVect);
 
-	//Counter used for random number generation
+	//Ordered sequence used for random number generation
 	thrust::counting_iterator<size_t> index_sequence_begin(0);
 
 	//Generation of the random list of float
