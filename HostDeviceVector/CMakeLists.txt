@@ -11,11 +11,14 @@ set( OUTPUT_NAME HostDeviceVector )
 ####	        Src files           ####
 ########################################
 
-set (sources
-	#Applications
+set( sources
 	HostDeviceVector.cu
 )
-	
+
+set( headers
+	HostDeviceVector.cu.h
+)
+
 set( cuda_deps cudadevrt )
 if (WIN32)
 	link_directories(${CUDA_TOOLKIT_ROOT_DIR}/lib/x64)

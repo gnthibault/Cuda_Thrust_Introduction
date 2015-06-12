@@ -8,13 +8,16 @@
 //STL
 #include <cstdlib>
 
-//Thrust
-#include "thrust/device_vector.h"
-#include "thrust/host_vector.h"
+//Local
+#include "HostDeviceVector.cu.h"
 
 
 int main( int argc, char* argv[] )
 {
+	version1();
+	version2();
+	version3();
+	version4();
 
 	return EXIT_SUCCESS;
 }
