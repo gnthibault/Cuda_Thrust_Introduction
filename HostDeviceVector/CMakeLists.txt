@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.0)
 
 ########################################
 ####        Generic Part            ####
@@ -19,6 +19,7 @@ set( headers
 	HostDeviceVector.cu.h
 )
 
+#runtime libs for cuda
 set( cuda_deps cudadevrt )
 if (WIN32)
 	link_directories(${CUDA_TOOLKIT_ROOT_DIR}/lib/x64)

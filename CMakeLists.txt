@@ -36,7 +36,7 @@ endif()
 ########################################
 
 add_subdirectory( HostDeviceVector )
-#add_subdirectory( DeviceBackend )
+add_subdirectory( DeviceBackend )
 #add_subdirectory( AsynchronousLaunch )
 #add_subdirectory( ThrustVectorWrappingCublas )
 #add_subdirectory( MultiGpuThrust )
