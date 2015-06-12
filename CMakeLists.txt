@@ -14,6 +14,10 @@ if( CMAKE_BUILD_TYPE STREQUAL "Debug" )
 	if(UNIX)
 		ADD_DEFINITIONS(${CMAKE_CXX_FLAGS} "-Wall -O0 -ggdb")
 	endif()
+else()
+	if(UNIX)
+		ADD_DEFINITIONS(${CMAKE_CXX_FLAGS} "-O3 -mtune=native -march=native")
+	endif()
 endif()
 
 ########################################
@@ -28,7 +32,7 @@ list( APPEND CUDA_NVCC_FLAGS -gencode arch=compute_30,code=sm_30 -gencode arch=c
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	list( APPEND CUDA_NVCC_FLAGS --device-debug --generate-line-info -g -G -DTHRUST_DEBUG )
 else ()
-	list( APPEND CUDA_NVCC_FLAGS -use_fast_math )
+	list( APPEND CUDA_NVCC_FLAGS -use_fast_math -O3 )
 endif()
 
 ########################################
