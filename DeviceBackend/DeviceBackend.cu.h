@@ -12,7 +12,6 @@
 //Thrust
 #include <thrust/random.h>
 
-
 //Create a functor that issues number following a normal distribution of specific mean and standard deviation
 struct normalRandomFunctor
 {
