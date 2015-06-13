@@ -27,7 +27,7 @@
 
 int main( int argc, char* argv[] )
 {
-	const size_t fullSize = 1024*1024*16;
+	const size_t fullSize = 1024*1024*64;
 	const size_t halfSize = fullSize/2;
 
 	//Declare one host std::vector and initialize it with random values

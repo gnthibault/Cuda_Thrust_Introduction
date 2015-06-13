@@ -32,7 +32,7 @@ list( APPEND CUDA_NVCC_FLAGS -gencode arch=compute_30,code=sm_30 -gencode arch=c
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	list( APPEND CUDA_NVCC_FLAGS --device-debug --generate-line-info -g -G -DTHRUST_DEBUG )
 else ()
-	list( APPEND CUDA_NVCC_FLAGS -use_fast_math -O3 )
+	list( APPEND CUDA_NVCC_FLAGS -use_fast_math -O3 ) #--default-stream per-thread )
 endif()
 
 ########################################
