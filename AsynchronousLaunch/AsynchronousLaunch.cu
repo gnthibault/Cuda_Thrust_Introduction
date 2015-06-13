@@ -17,13 +17,13 @@
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 #include <thrust/execution_policy.h>
-#include <thrust/scan.h>
 
 //Cuda
 #include <cuda_runtime.h>
 
 //Local
 #include "AsynchronousLaunch.cu.h"
+#include "../Include/cudaHelper.cu.h"
 
 int main( int argc, char* argv[] )
 {
@@ -38,7 +38,6 @@ int main( int argc, char* argv[] )
 
 	//And one device vector of the same size
 	thrust::device_vector<float> deviceVector( fullSize );
-	thrust::device_vector<float> deviceVector2( fullSize );
 
 	//Declare  and initialize also two cuda stream
 	std::vector<cudaStream_t> vStream(nbOfStrip);

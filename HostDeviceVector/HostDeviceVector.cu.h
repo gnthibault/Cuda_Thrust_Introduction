@@ -21,6 +21,9 @@
 //Cuda
 #include <cuda_runtime.h>
 
+//Local
+#include "../Include/cudaHelper.cu.h"
+
 #define VEC_SIZE 8
 
 //Version 1: Thrust as a nice wrapper for generic algorithms
@@ -78,7 +81,7 @@ void version3()
 {
 	//Raw pointer to device memory
 	int * raw_ptr;
-	cudaMalloc((void **) &raw_ptr, VEC_SIZE * sizeof(int));
+	checkCudaErrors( cudaMalloc((void **) &raw_ptr, VEC_SIZE * sizeof(int) ) );
 
 	//Wrap raw pointer with a device_ptr
 	thrust::device_ptr<int> dev_ptr(raw_ptr);
@@ -98,7 +101,7 @@ void version3()
 	std::cout << std::endl;
 
 	// free memory
-	cudaFree(raw_ptr);
+	checkCudaErrors( cudaFree(raw_ptr) );
 }
 
 template<typename T, size_t SIZE>
@@ -121,9 +124,9 @@ void version4()
 
 	//Compute algorithm
 	cudaStream_t stream;
-	cudaStreamCreate(&stream);
+	checkCudaErrors( cudaStreamCreate(&stream) );
 	naive_sequential_scan<int,VEC_SIZE><<<1,1,0,stream>>>( thrust::raw_pointer_cast(deviceVector.data() ) );
-	cudaStreamSynchronize( stream);
+	checkCudaErrors( cudaStreamSynchronize( stream) );
 
 	//Print results
 	std::cout << "Version 2, vector contains: ";
@@ -132,7 +135,7 @@ void version4()
 		std::cout << " / " << *it;  //Dereferencing iterator for reading: can also be done for writing !
 	}
 	std::cout << std::endl;
-	cudaStreamDestroy(stream);
+	checkCudaErrors( cudaStreamDestroy(stream) );
 }
 
 #endif /* HOSTDEVICEVECTOR_CU_H_ */

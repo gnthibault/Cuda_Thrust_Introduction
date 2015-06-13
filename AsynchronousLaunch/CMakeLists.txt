@@ -16,6 +16,7 @@ set( sources
 )
 
 set( headers
+	../Include/cudaHelper.cu.h
 	AsynchronousLaunch.cu.h
 )
 

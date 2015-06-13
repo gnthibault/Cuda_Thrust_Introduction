@@ -66,6 +66,6 @@ int main( int argc, char* argv[] )
 }
 
 //Cuda backend sorted 134217728 elements in 0.485675 seconds (276.353 Millions of elements/s )
-//OpenMP backend sorted 134217728 elements in 224.313 seconds (0.598351 Millions of elements/s )
-//TBB backend sorted 134217728 elements in 126.267 seconds (1.06297 Millions of elements/s )
+//OpenMP backend sorted 134217728 elements in 2.01271 seconds (66.685 Millions of elements/s )
+//TBB backend sorted 134217728 elements in 1.42055 seconds (94.4827 Millions of elements/s )
 
