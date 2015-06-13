@@ -36,7 +36,7 @@ int main( int argc, char* argv[] )
 	thrust::transform(	index_sequence_begin,
 						index_sequence_begin + sizeVect,
 						deviceVector.begin(),
-						normalRandomFunctor(0.f,10.f) );
+						normalRandomFunctor<float>(0.f,10.f) );
 
 	//Now measure how many time it take to perform sorting operation
 	auto begin = std::chrono::high_resolution_clock::now();

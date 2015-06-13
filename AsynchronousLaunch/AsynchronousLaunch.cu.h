@@ -8,26 +8,38 @@
 #ifndef ASYNCHRONOUSLAUNCH_CU_H_
 #define ASYNCHRONOUSLAUNCH_CU_H_
 
-/*
- * #include <thrust/for_each.h>
-#include <thrust/device_vector.h>
-#include <thrust/execution_policy.h>
-#include <cstdio>
-struct printf_functor
+
+//STL
+#include <random>
+
+//Create a functor that issues number following a normal distribution of specific mean and standard deviation
+//Here we show how to write the same generator used in DeviceBackend.cu.h, but in full plain C++11 instead of thrust
+template<typename T>
+struct normalRandomFunctor
 {
-  __host__ __device__
-  void operator()(int x)
-  {
-    // note that using printf in a __device__ function requires
-    // code compiled for a GPU with compute capability 2.0 or
-    // higher (nvcc --arch=sm_20)
-    printf("%d\n");
-  }
+    normalRandomFunctor(T mean=0.f, T stddev=1.f) : m_generator(std::random_device()()), m_dist(mean, stddev) {};
+
+	T operator()()
+	{
+		return m_dist(m_generator);
+	}
+private:
+	//Mersenne Twister 19937 generator
+	std::mt19937 m_generator;
+	std::normal_distribution<T> m_dist;
 };
-...
-thrust::device_vector<int> d_vec(3);
-d_vec[0] = 0; d_vec[1] = 1; d_vec[2] = 2;
-thrust::for_each_n(thrust::device, d_vec.begin(), d_vec.size(), printf_functor());
- *
- */
+
+template<typename T>
+struct computeFunctor
+{
+	__host__ __device__
+	computeFunctor() {}
+
+	__host__ __device__
+	T operator()( T in )
+	{
+		//Naive functor that generates expensive but useless instructions
+		return pow(cos(in),2)+pow(sin(in),2);
+	}
+};
 #endif /* ASYNCHRONOUSLAUNCH_CU_H_ */

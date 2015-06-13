@@ -32,9 +32,9 @@ void version1()
 	thrust::host_vector<int> hostVector;
 
 	//Allocate vector on device
-	deviceVector = thrust::device_vector<int>( VEC_SIZE );
+	deviceVector.resize( VEC_SIZE );
 	//Initialize host vector as size 8 elements, each containing the value 111
-	hostVector = thrust::host_vector<int>( VEC_SIZE, 111 );
+	hostVector.resize( VEC_SIZE, 111 );
 
 	//Explicit copy to device
 	thrust::copy( hostVector.begin(), hostVector.end(), deviceVector.begin() );

@@ -13,23 +13,24 @@
 #include <thrust/random.h>
 
 //Create a functor that issues number following a normal distribution of specific mean and standard deviation
+template<typename T>
 struct normalRandomFunctor
 {
     __host__ __device__
-    normalRandomFunctor(float a=0.f, float b=1.f) : m_mean(a), m_stddev(b) {};
+    normalRandomFunctor(T a=0.f, T b=1.f) : m_mean(a), m_stddev(b) {};
 
     __host__ __device__
 	float operator()(const size_t n) const
 	{
 		thrust::default_random_engine rng;
-		thrust::random::normal_distribution<float> dist(m_mean, m_stddev);
+		thrust::random::normal_distribution<T> dist(m_mean, m_stddev);
 		rng.discard(n);
 
 		return dist(rng);
 	}
 private:
-    float m_mean;
-    float m_stddev;
+    T m_mean;
+    T m_stddev;
 };
 
 
