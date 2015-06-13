@@ -39,7 +39,12 @@ struct computeFunctor
 	T operator()( T in )
 	{
 		//Naive functor that generates expensive but useless instructions
-		return pow(cos(in),2)+pow(sin(in),2);
+		T a =  cos(in);
+		for(int i = 0; i < 350; i++ )
+		{
+			a+=cos(in);
+		}
+		return a;
 	}
 };
 #endif /* ASYNCHRONOUSLAUNCH_CU_H_ */
