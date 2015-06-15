@@ -78,7 +78,7 @@ endif()
 ########################################
 ####       	    MKL Part            ####
 ########################################
-#MKL seems to causes trouble during runtime because of linking both using both gcc gomp and
+
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake" "FindMKL.cmake") 
 set( MKL_MULTI_THREADED 1 )
 #set( INTEL_ROOT "/softs/intel" )
