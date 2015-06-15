@@ -87,12 +87,17 @@ void testCublasWrapper()
 
 	std::cout << niter <<" iterations of gradient descent elements in " << elapsed << " seconds ("<< niter/elapsed <<" iterations per seconds )"<< std::endl;
 
-	//OpenMP backend performed 1000 iterations of gradient descent elements in 34.4254 seconds (0.0344254 seconds per iterations )
-	//TBB backend performed 1000 iterations of gradient descent elements in 4.8519 seconds (0.0048519 seconds per iterations )
-	//Cuda backend performed 1000 iterations of gradient descent elements in 0.731565 seconds (0.000731565 seconds per iterations )
+	//CPU code linked with default gsl_cblas lib and default gcc gomp threading library
+	//OpenMP backend performed 1000 iterations of gradient descent elements in 19.6776 seconds (50.8192 iterations per seconds )
+	//TBB backend performed 1000 iterations of gradient descent elements in 13.6715 seconds (73.145 iterations per seconds )
 
-	//CPU code Linked with MKL from Intel
-	//TBB backend performed 1000 iterations of gradient descent elements in 4.87075 seconds (205.307 iterations per seconds )
+	//CPU code Linked with MKL from Intel, and openMP runtime from intel (iomp5 instead of gomp
+	//OpenMP backend performed 1000 iterations of gradient descent elements in 2.46626 seconds (405.473 iterations per seconds )
+	//TBB backend performed 1000 iterations of gradient descent elements in 2.163 seconds (462.32 iterations per seconds )
+
+	//Cuda Backend
+	//Cuda backend performed 1000 iterations of gradient descent elements in 0.725926 seconds (1377.55 iterations per seconds )
+
 
 
 };
