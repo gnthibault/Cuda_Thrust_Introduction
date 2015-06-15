@@ -85,7 +85,14 @@ void testCublasWrapper()
 		std::cout << "TBB backend performed " ;
 	#endif // THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
 
-	std::cout << niter <<" iterations of gradient descent elements in " << elapsed << " seconds ("<< elapsed/niter <<" seconds per iterations )"<< std::endl;
+	std::cout << niter <<" iterations of gradient descent elements in " << elapsed << " seconds ("<< niter/elapsed <<" iterations per seconds )"<< std::endl;
+
+	//OpenMP backend performed 1000 iterations of gradient descent elements in 34.4254 seconds (0.0344254 seconds per iterations )
+	//TBB backend performed 1000 iterations of gradient descent elements in 4.8519 seconds (0.0048519 seconds per iterations )
+	//Cuda backend performed 1000 iterations of gradient descent elements in 0.731565 seconds (0.000731565 seconds per iterations )
+
+	//CPU code Linked with MKL from Intel
+	//TBB backend performed 1000 iterations of gradient descent elements in 4.87075 seconds (205.307 iterations per seconds )
 
 
 };

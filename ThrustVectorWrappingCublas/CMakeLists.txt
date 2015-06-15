@@ -34,7 +34,7 @@ endif()
 ########################################
 #Change device execution for fun !
 #set(THRUST_DEVICE_SYSTEM THRUST_DEVICE_SYSTEM_CUDA)
-set(THRUST_DEVICE_SYSTEM "THRUST_DEVICE_SYSTEM_OMP -Xcompiler -fopenmp" )
+set(THRUST_DEVICE_SYSTEM "THRUST_DEVICE_SYSTEM_OMP -Xcompiler -fopenmp")
 #set(THRUST_DEVICE_SYSTEM THRUST_DEVICE_SYSTEM_TBB)
 
 list( APPEND CUDA_NVCC_FLAGS -DTHRUST_DEVICE_SYSTEM=${THRUST_DEVICE_SYSTEM} )
@@ -78,14 +78,16 @@ endif()
 ########################################
 ####       	    MKL Part            ####
 ########################################
-
+#MKL seems to causes trouble during runtime because of linking both using both gcc gomp and
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake" "FindMKL.cmake") 
 set( MKL_MULTI_THREADED 1 )
-
+#set( INTEL_ROOT "/softs/intel" )
+set( INTEL_ROOT "/opt/intel/composer_xe_2015.0.090" )
 FIND_PACKAGE(MKL)
-
 if( MKL_FOUND )
 	set( blas_deps ${MKL_LIBRARIES} )
+	LINK_DIRECTORIES(${MKL_LIBRARY_PATH})
+	unset(omp_deps)
 endif()
 
 ########################################
