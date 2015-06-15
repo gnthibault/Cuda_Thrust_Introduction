@@ -17,6 +17,7 @@
 #include <thrust/device_ptr.h>
 #include <thrust/host_vector.h>
 #include <thrust/scan.h>
+#include <thrust/system_error.h>
 
 //Cuda
 #include <cuda_runtime.h>
@@ -129,13 +130,37 @@ void version4()
 	checkCudaErrors( cudaStreamSynchronize( stream) );
 
 	//Print results
-	std::cout << "Version 2, vector contains: ";
+	std::cout << "Version 4, vector contains: ";
 	for( auto it = deviceVector.begin(); it != deviceVector.end(); it++ )
 	{
 		std::cout << " / " << *it;  //Dereferencing iterator for reading: can also be done for writing !
 	}
 	std::cout << std::endl;
 	checkCudaErrors( cudaStreamDestroy(stream) );
+}
+
+//This version only intend to show that thrust allows to handle error
+//through a proper exception handling mechanism
+void version5()
+{
+	try
+	{
+		//Declare and initialize device vector in one line
+		thrust::device_vector<int> deviceVector( VEC_SIZE, 111 );
+
+		//Compute algorithm
+		std::cout << "Version 5, we are going to catch an exception: ";
+		thrust::inclusive_scan( deviceVector.begin(), deviceVector.end()+1, deviceVector.begin() ); //This line purposely contains an error
+
+		//Print results
+		for( auto it = deviceVector.begin(); it != deviceVector.end(); it++ )
+		{
+			std::cout << " / " << *it;
+		}
+	} catch( thrust::system_error &e )
+	{
+		std::cerr << "Thrust mechanism for handling error in version5() caused by : " << e.what() << std::endl;
+	}
 }
 
 #endif /* HOSTDEVICEVECTOR_CU_H_ */

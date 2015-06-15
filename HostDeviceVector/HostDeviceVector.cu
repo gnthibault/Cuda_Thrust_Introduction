@@ -18,6 +18,7 @@ int main( int argc, char* argv[] )
 	version2();
 	version3();
 	version4();
+	version5();
 
 	return EXIT_SUCCESS;
 }
