@@ -27,7 +27,8 @@ endif()
 find_package(CUDA 7.0 REQUIRED)
 
 #generic compilation flag, defines target architecture, type of build, ...
-list( APPEND CUDA_NVCC_FLAGS -gencode arch=compute_30,code=sm_30 -gencode arch=compute_35,code=sm_35 -gencode arch=compute_52,code=sm_52 -std=c++11)
+list( APPEND CUDA_NVCC_FLAGS  -gencode arch=compute_35,code=sm_35 -std=c++11)
+#-gencode arch=compute_30,code=sm_30 -gencode arch=compute_52,code=sm_52
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	list( APPEND CUDA_NVCC_FLAGS --device-debug --generate-line-info -g -G -DTHRUST_DEBUG )
