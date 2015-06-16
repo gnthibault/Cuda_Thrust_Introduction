@@ -106,14 +106,14 @@ void testVariationalSignalDenoising()
 	std::cout << "***********************************************************************" << std::endl;
 
 	//Settings of the solver
-	const size_t nbIteration = 50000;
-	const double epsilonNorm = 0.5;
-	const double lambda = 4.0;
+	const size_t nbIteration = 1000;
+	const double epsilonNorm = 0.7;
+	const double lambda = 6.0;
 	const double stepSize = 2.0/(1.0+4.0*lambda/epsilonNorm);
 
 
 	//Declaring known data of the problem: a simple square wave for instance
-	const size_t sizeSignal = 2048;
+	const size_t sizeSignal = 1024;
 	const size_t halfOscillationPeriod = sizeSignal/16;
 	ThrustVectorWrapper<float> Y( sizeSignal );
 
@@ -171,7 +171,7 @@ void testVariationalSignalDenoising()
 		grad.Saxpy( TvGradient, -lambda, false );			// grad = X - Y + GradientTV
 		X.Saxpy( grad, -stepSize, false );					// Update solution
 
-		std::cout <<"Iteration : "<<niter<< " over " <<nbIteration<<" , functional = " << 0 << std::endl;
+		std::cout <<"Iteration : "<<niter<< " over " << nbIteration << std::endl;
 
 		niter++; 										// Ready for next iteration
 	}

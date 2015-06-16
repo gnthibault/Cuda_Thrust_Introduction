@@ -140,6 +140,7 @@ public:
 		try
 		{
 			thrust::adjacent_difference( in.begin(), in.end(), m_deviceVector.begin());
+			*(m_deviceVector.begin()) = 0; //for stability reason, we prefere a null difference at first place
 		}
 		catch( thrust::system_error &e )
 		{
@@ -154,7 +155,7 @@ public:
 		try
 		{
 			thrust::transform( in.begin()+1, in.end(), in.begin(), m_deviceVector.begin(), thrust::minus<T>() );
-			*(m_deviceVector.end()-1) = *(in.end()-1);
+			*(m_deviceVector.end()-1) = 0; //for stability reason, we prefere a null difference at last place
 		}
 		catch( thrust::system_error &e )
 		{
