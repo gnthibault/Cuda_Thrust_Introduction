@@ -150,10 +150,10 @@ void version5()
 
 		//Compute algorithm
 		std::cout << "Version 5, we are going to catch an exception: ";
-		thrust::inclusive_scan( deviceVector.begin(), deviceVector.end()+1, deviceVector.begin() ); //This line purposely contains an error
+		thrust::inclusive_scan( deviceVector.begin(), deviceVector.end(), deviceVector.begin() );
 
 		//Print results
-		for( auto it = deviceVector.begin(); it != deviceVector.end(); it++ )
+		for( auto it = deviceVector.begin()-1; it != deviceVector.end(); it++ ) //This line purposely contains an error
 		{
 			std::cout << " / " << *it;
 		}
