@@ -191,7 +191,18 @@ void testVariationalSignalDenoising()
 		std::cout << "TBB backend performed " ;
 	#endif // THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
 
-	std::cout << niter <<" iterations of gradient descent elements in " << elapsed << " seconds ("<< niter/elapsed <<" iterations per seconds )"<< std::endl;
+	std::cout << niter <<" iterations of gradient descent over "<<sizeSignal<<" elements in " << elapsed << " seconds ("<< niter/elapsed <<" iterations per seconds )"<< std::endl;
+
+	//CPU code linked with default gcc gomp threading library
+	//OpenMP backend performed 10000 iterations of gradient descent over 33554432 elements in 1672.89 seconds (5.97768 iterations per seconds )
+	//TBB backend performed 10000 iterations of gradient descent over 33554432 elements in 1648.48 seconds (6.0662 iterations per seconds )
+
+	//CPU code Linked with openMP runtime from intel (iomp5 instead of gomp )
+	//OpenMP backend performed 10000 iterations of gradient descent over 33554432 elements in 1618.75 seconds (6.17761 iterations per seconds )
+
+	//Cuda Backend
+	//Cuda backend performed 10000 iterations of gradient descent over 33554432 elements in 105.78 seconds (94.5358 iterations per seconds )
+
 };
 
 

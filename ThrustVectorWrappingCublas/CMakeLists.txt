@@ -81,7 +81,7 @@ endif()
 
 set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake" "FindMKL.cmake") 
 set( MKL_MULTI_THREADED 1 )
-set( INTEL_ROOT "/softs/intel" )
+#set( INTEL_ROOT "/softs/intel" )
 #set( INTEL_ROOT "/opt/intel/composer_xe_2015.0.090" )
 FIND_PACKAGE(MKL)
 if( MKL_FOUND )
