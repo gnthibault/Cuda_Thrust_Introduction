@@ -106,10 +106,10 @@ void testVariationalSignalDenoising()
 	std::cout << "***********************************************************************" << std::endl;
 
 	//Settings of the solver
-	const size_t nbIteration = 1000;
-	const double epsilonNorm = 0.7;
-	const double lambda = 6.0;
-	const double stepSize = 2.0/(1.0+4.0*lambda/epsilonNorm);
+	const size_t nbIteration = 10000;
+	const double epsilonNorm = 1e-3;
+	const double lambda = 1.1/5.0;
+	const double stepSize = 4.0*( 1.8/(1.0+8.0*lambda/epsilonNorm) );
 
 
 	//Declaring known data of the problem: a simple square wave for instance
