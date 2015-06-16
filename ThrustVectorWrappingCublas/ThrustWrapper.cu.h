@@ -11,6 +11,7 @@
 // STL
 #include <ctime>
 #include <iostream>
+#include <fstream>
 
 //Thrust
 #include <thrust/system_error.h>
@@ -57,6 +58,34 @@ public:
 	const thrust::device_vector<T>& GetConstDeviceVector() const
 	{
 		return m_deviceVector;
+	}
+	//Output to end of .csv
+	void SendToCSV( std::string strName = std::string( "Denoising.csv") )
+	{
+		std::ofstream CSVToFile( strName, std::ios_base::app );
+		for( auto it = m_deviceVector.begin(); it != m_deviceVector.end(); it++)
+		{
+			if (it != m_deviceVector.begin())
+			{
+					CSVToFile << ",";
+			}
+			CSVToFile << *it;
+		}
+		CSVToFile << std::endl;
+	}
+
+	//Vector operators
+	void Assign( const ThrustVectorWrapper<T>& Input )
+	{
+		try
+		{
+			thrust::copy( Input.GetConstDeviceVector().begin(), Input.GetConstDeviceVector().end(),	m_deviceVector.begin() );
+		}
+		catch( thrust::system_error &e )
+		{
+			std::cerr << "ThrustVectorWrapper::Assign("<< &Input <<") error: " << e.what() << std::endl;
+			exit(-1);
+		}
 	}
 	void Add( const ThrustVectorWrapper<T>& Input )
 	{
@@ -105,12 +134,12 @@ public:
 		}
 	}
 	// FiniteDifference : compute Input[0]=m_dev[0] and Input[n] = m_dev[n]-m_dev[n-1]
-	void FiniteForwardDifference( ThrustVectorWrapper<T>& Input )
+	void FiniteForwardDifference( const ThrustVectorWrapper<T>& Input )
 	{
 		const thrust::device_vector<T>& in = Input.GetConstDeviceVector();
 		try
 		{
-			thrust::adjacent_difference( m_deviceVector.begin(), m_deviceVector.end(), in.begin());
+			thrust::adjacent_difference( in.begin(), in.end(), m_deviceVector.begin());
 		}
 		catch( thrust::system_error &e )
 		{
@@ -166,15 +195,16 @@ public:
 	void FillWitGaussianRandomValues( T mean = 0, T stddev = 1)
 	{
 		GaussianRandomFunctor g(mean,stddev);
-		FillWitRandomFunctor( g );
+		_FillWitRandomFunctor( g );
 	}
 	void FillWitNormalRandomValues( T min = 0, T max = 1)
 	{
 		UniformRandomFunctor u(min,max);
-		FillWitRandomFunctor( u );
+		_FillWitRandomFunctor( u );
 	}
+protected:
 	template< class Func >
-	void FillWitRandomFunctor( Func& functor )
+	void _FillWitRandomFunctor( Func& functor )
 	{
 		try
 		{

@@ -106,13 +106,14 @@ void testVariationalSignalDenoising()
 	std::cout << "***********************************************************************" << std::endl;
 
 	//Settings of the solver
-	const size_t nbIteration = 1000;
-	const double stepSize = 1;
-	const double epsilonNormReg = 0.5;
-	const double lambda = 0.15;
+	const size_t nbIteration = 50000;
+	const double epsilonNorm = 0.5;
+	const double lambda = 4.0;
+	const double stepSize = 2.0/(1.0+4.0*lambda/epsilonNorm);
+
 
 	//Declaring known data of the problem: a simple square wave for instance
-	const size_t sizeSignal = 1024*2;
+	const size_t sizeSignal = 2048;
 	const size_t halfOscillationPeriod = sizeSignal/16;
 	ThrustVectorWrapper<float> Y( sizeSignal );
 
@@ -120,17 +121,23 @@ void testVariationalSignalDenoising()
 	float value = 0;
 	for( int i = 0; i < sizeSignal; i += halfOscillationPeriod )
 	{
-		thrust::fill( Y.GetDeviceVector().begin()+i, Y.GetDeviceVector().begin()+halfOscillationPeriod, value);
+		thrust::fill( Y.GetDeviceVector().begin()+i, Y.GetDeviceVector().begin()+i+halfOscillationPeriod, value);
 		value = (value==0) ? 1 : 0;
 	}
 
+	//Write perfect vector to CSV
+	Y.SendToCSV();
+
 	//Generate a gaussian noise of variance sigma
-	const double sigma = 0.2;
+	const double sigma = 0.05;
 	ThrustVectorWrapper<float> noise( sizeSignal );
 	noise.FillWitGaussianRandomValues(0,sigma);
 
 	//Add noise to original signal
 	Y.Add( noise );
+
+	//Write noisy vector to CSV
+	Y.SendToCSV();
 
 	//Unknown: the denoised version of the signal: initialized to 0
 	ThrustVectorWrapper<float> X( sizeSignal );
@@ -140,6 +147,7 @@ void testVariationalSignalDenoising()
 	 ***********************************************************************/
 
 	//Declaring operand needed for gradient descent
+	ThrustVectorWrapper<float> TvGradientTmp( sizeSignal ); //Temporary variable used for calculation
 	ThrustVectorWrapper<float> TvGradient( sizeSignal );
 	ThrustVectorWrapper<float> grad( sizeSignal );
 
@@ -148,24 +156,22 @@ void testVariationalSignalDenoising()
 	 ******************/
 
 	//Initialization
-	/*int niter = 0;
-	double gradstep = 0;
-	double L2Error = convergenceTol + 1;
+	int niter = 0;
 
 	//Now measure how many time it takes to perform all iterations
 	auto begin = std::chrono::high_resolution_clock::now();
 
-	while( (niter < nbIteration) && (L2Error > convergenceTol) )
+	while( niter < nbIteration )
 	{
-		A.Prod( X, Ax );								// Ax = A * x
-		Ax.Substract( B );								// Ax = Ax - b
-		A.transProd( Ax, grad );						// grad = A^t(Ax - B)
-		A.Prod( grad, Ag );								// Ag = A * gradient
-		gradstep = grad.GetNorm22()/Ag.GetNorm22();		// Compute gradient step
-		X.Saxpy( grad, -gradstep, false );				// Update solution
+		grad.Assign( X );									// grad = X
+		grad.Substract( Y );								// grad = X - Y
+		TvGradientTmp.FiniteForwardDifference( X );			// TvGradient = G(X)
+		TvGradientTmp.ApplySmoothedTVGradient(epsilonNorm);	// TvGradient = TvGradient / ||TvGradient||e
+		TvGradient.FiniteBackwarDifference(TvGradientTmp);	// TvGradient = div( TvGradient / ||TvGradient||e )
+		grad.Saxpy( TvGradient, -lambda, false );			// grad = X - Y + GradientTV
+		X.Saxpy( grad, -stepSize, false );					// Update solution
 
-		L2Error = Ax.GetNorm22();						// Compute functional at current step
-		std::cout <<"Iteration : "<<niter<< " over " <<nbIteration<<" , L2 error = " << L2Error << std::endl;
+		std::cout <<"Iteration : "<<niter<< " over " <<nbIteration<<" , functional = " << 0 << std::endl;
 
 		niter++; 										// Ready for next iteration
 	}
@@ -173,6 +179,9 @@ void testVariationalSignalDenoising()
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<float> _elapsed = end - begin;
 	double elapsed = _elapsed.count();
+
+	//Write denoised vector to CSV
+	X.SendToCSV();
 
 	#if THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
 		std::cout << "Cuda backend performed " ;
@@ -182,7 +191,7 @@ void testVariationalSignalDenoising()
 		std::cout << "TBB backend performed " ;
 	#endif // THRUST_DEVICE_SYSTEM == THRUST_DEVICE_SYSTEM_CUDA
 
-	std::cout << niter <<" iterations of gradient descent elements in " << elapsed << " seconds ("<< niter/elapsed <<" iterations per seconds )"<< std::endl;*/
+	std::cout << niter <<" iterations of gradient descent elements in " << elapsed << " seconds ("<< niter/elapsed <<" iterations per seconds )"<< std::endl;
 };
 
 
