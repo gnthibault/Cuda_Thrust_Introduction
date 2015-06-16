@@ -107,6 +107,9 @@ void testVariationalSignalDenoising()
 
 	//Settings of the solver
 	const size_t nbIteration = 1000;
+	const double stepSize = 1;
+	const double epsilonNormReg = 0.5;
+	const double lambda = 0.15;
 
 	//Declaring known data of the problem: a simple square wave for instance
 	const size_t sizeSignal = 1024*2;
@@ -124,9 +127,10 @@ void testVariationalSignalDenoising()
 	//Generate a gaussian noise of variance sigma
 	const double sigma = 0.2;
 	ThrustVectorWrapper<float> noise( sizeSignal );
-	//sizeSignal.FillWitGaussianRandomValues(0,sigma);
+	noise.FillWitGaussianRandomValues(0,sigma);
 
-	//TODO TN: add noise to signal
+	//Add noise to original signal
+	Y.Add( noise );
 
 	//Unknown: the denoised version of the signal: initialized to 0
 	ThrustVectorWrapper<float> X( sizeSignal );
@@ -135,10 +139,9 @@ void testVariationalSignalDenoising()
 	 * Solving min 0,5*||Y-X||² + \lambda Grad_e(x) using gradient descent *
 	 ***********************************************************************/
 
-	//Declaring operand needed for
-	/*ThrustVectorWrapper<float> Ax( sizeImage );
-	ThrustVectorWrapper<float> Ag( sizeImage );
-	ThrustVectorWrapper<float> grad( sizeDomain );*/
+	//Declaring operand needed for gradient descent
+	ThrustVectorWrapper<float> TvGradient( sizeSignal );
+	ThrustVectorWrapper<float> grad( sizeSignal );
 
 	/******************
 	 * Main Algorithm *

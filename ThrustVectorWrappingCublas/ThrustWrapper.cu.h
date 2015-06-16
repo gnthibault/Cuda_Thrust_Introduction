@@ -22,7 +22,7 @@
 #include <thrust/inner_product.h>
 #include <thrust/random.h>
 #include <thrust/iterator/counting_iterator.h>
-
+#include <thrust/adjacent_difference.h>
 
 template<typename T>
 class ThrustVectorWrapper
@@ -58,7 +58,20 @@ public:
 	{
 		return m_deviceVector;
 	}
-	virtual void Substract( ThrustVectorWrapper<T>& Input )
+	void Add( const ThrustVectorWrapper<T>& Input )
+	{
+		const thrust::device_vector<T>& in = Input.GetConstDeviceVector();
+		try
+		{
+			thrust::transform( m_deviceVector.begin(), m_deviceVector.end(), in.begin(), m_deviceVector.begin(), thrust::plus<T>() );
+		}
+		catch( thrust::system_error &e )
+		{
+			std::cerr << "ThrustVectorWrapper::Add("<<&Input<<") error: " << e.what() << std::endl;
+			exit(-1);
+		}
+	}
+	void Substract( ThrustVectorWrapper<T>& Input )
 	{
 		const thrust::device_vector<T>& in = Input.GetConstDeviceVector();
 		try
@@ -72,7 +85,7 @@ public:
 		}
 	}
 	//Saxpy: X <- AX + Y  or X <- AY + X , X being the member vector
-	virtual void Saxpy( ThrustVectorWrapper<T>& Input, const double scalarInput, bool isMemberMultipliedByScalar )
+	void Saxpy( ThrustVectorWrapper<T>& Input, const double scalarInput, bool isMemberMultipliedByScalar )
 	{
 		const thrust::device_vector<T>& in = Input.GetConstDeviceVector();
 		try
@@ -91,22 +104,52 @@ public:
 			exit(-1);
 		}
 	}
-
-	//Norm-style operator
-	virtual double GetNorm0() const
+	// FiniteDifference : compute Input[0]=m_dev[0] and Input[n] = m_dev[n]-m_dev[n-1]
+	void FiniteForwardDifference( ThrustVectorWrapper<T>& Input )
 	{
-		double result = 0.0;
+		const thrust::device_vector<T>& in = Input.GetConstDeviceVector();
 		try
 		{
-			result = thrust::reduce( m_deviceVector.begin(), m_deviceVector.end(), 0.0, norm0_functor() );
+			thrust::adjacent_difference( m_deviceVector.begin(), m_deviceVector.end(), in.begin());
 		}
 		catch( thrust::system_error &e )
 		{
-			std::cerr << "ThrustVectorWrapper::GetNorm0() error: " << e.what() << std::endl;
+			std::cerr << "ThrustVectorWrapper::FiniteForwardDifference("<<&Input<<") error: " << e.what() << std::endl;
+			exit(-1);
 		}
-		return result;
 	}
-	virtual double GetNorm22() const
+	// FiniteDifference : compute Input[last]=m_dev[last] and Input[n] = m_dev[n+1]-m_dev[n]
+	void FiniteBackwarDifference( const ThrustVectorWrapper<T>& Input )
+	{
+		const thrust::device_vector<T>& in = Input.GetConstDeviceVector();
+		try
+		{
+			thrust::transform( in.begin()+1, in.end(), in.begin(), m_deviceVector.begin(), thrust::minus<T>() );
+			*(m_deviceVector.end()-1) = *(in.end()-1);
+		}
+		catch( thrust::system_error &e )
+		{
+			std::cerr << "ThrustVectorWrapper::FiniteBackwarDifference("<<&Input<<") error: " << e.what() << std::endl;
+			exit(-1);
+		}
+	}
+
+	// ApplySmoothedTVGradient
+	void ApplySmoothedTVGradient( T epsilon )
+	{
+		try
+		{
+			thrust::transform( m_deviceVector.begin(), m_deviceVector.end(), m_deviceVector.begin(), smoothedTVGradient_functor(epsilon) );
+		}
+		catch( thrust::system_error &e )
+		{
+			std::cerr << "ThrustVectorWrapper::ApplySmoothedTVGradient("<<epsilon<<") error: " << e.what() << std::endl;
+			exit(-1);
+		}
+	}
+
+	//Norm-style operator
+	double GetNorm22() const
 	{
 		double result = 1.0;
 		try
@@ -116,10 +159,22 @@ public:
 		catch( thrust::system_error &e )
 		{
 			std::cerr << "ThrustVectorWrapper::GetNorm22() error: " << e.what() << std::endl;
+			exit(-1);
 		}
 		return result;
 	}
-	virtual void FillWitNormalRandomValues( double min = 0, double max = 1)
+	void FillWitGaussianRandomValues( T mean = 0, T stddev = 1)
+	{
+		GaussianRandomFunctor g(mean,stddev);
+		FillWitRandomFunctor( g );
+	}
+	void FillWitNormalRandomValues( T min = 0, T max = 1)
+	{
+		UniformRandomFunctor u(min,max);
+		FillWitRandomFunctor( u );
+	}
+	template< class Func >
+	void FillWitRandomFunctor( Func& functor )
 	{
 		try
 		{
@@ -128,15 +183,16 @@ public:
 			thrust::transform( 	thrust::make_counting_iterator<size_t>( seed),
 								thrust::make_counting_iterator<size_t>( seed+m_deviceVector.size() ),
 								m_deviceVector.begin(),
-								UniformRandomFunctor(min,max));
+								functor );
 			m_sRandomSeed += m_deviceVector.size();
 		}
 		catch( thrust::system_error &e )
 		{
-			std::cerr << "ThrustVectorWrapper::FillWitNormalRandomValues(" << min << " , " << max << "), error: " << e.what() << std::endl;
+			std::cerr << "ThrustVectorWrapper::FillWitRandomFunctor(), error: " << e.what() << std::endl;
 			exit(-1);
 		}
 	}
+
 
 public:	//Specific functors for use with Thrust::transform
 	struct saxpy_functor : public thrust::binary_function<T,T,T>
@@ -149,31 +205,50 @@ public:	//Specific functors for use with Thrust::transform
 		};
 		const T m_a;
 	};
-	struct norm0_functor : public thrust::binary_function<T,T,T>
-	{
-		norm0_functor() {};
-		__host__ __device__
-		T operator()(const T& x, const T& y) const
-		{
-
-			return y != 0 ? x+1 : x;
-		};
-	};
-	struct UniformRandomFunctor : public thrust::binary_function<size_t,T,T>
+	struct UniformRandomFunctor : public thrust::unary_function<size_t,T>
 	{
 		UniformRandomFunctor(T min=0, T max=1) : m_min(min), m_max(max) {};
 
 		__host__ __device__
-		T operator()(size_t n) const
+		T operator()( const size_t n) const
 		{
 			//see http://docs.thrust.googlecode.com/hg/group__random__number__engine__adaptors.html for discarding behaviour
-			thrust::default_random_engine random_engine;
+			thrust::default_random_engine rng;
 			thrust::uniform_real_distribution<T> uniform_distribution(m_min, m_max);
-			random_engine.discard( n );
-			return uniform_distribution( random_engine );
+			rng.discard( n );
+			return uniform_distribution( rng );
 		};
 		const T m_min;
 		const T m_max;
+	};
+	struct GaussianRandomFunctor : public thrust::unary_function<size_t,T>
+	{
+		GaussianRandomFunctor(T a=0.f, T b=1.f) : m_mean(a), m_stddev(b) {};
+
+		__host__ __device__
+		T operator()(const size_t n) const
+		{
+			thrust::default_random_engine rng;
+			thrust::random::normal_distribution<T> gaussian_distribution(m_mean, m_stddev);
+			rng.discard(n);
+			return gaussian_distribution(rng);
+		}
+	private:
+		T m_mean;
+		T m_stddev;
+	};
+
+	struct smoothedTVGradient_functor : public thrust::unary_function<T,T>
+	{
+		smoothedTVGradient_functor( T epsilon ) : m_epsilonSquared( pow(epsilon,2) ) {};
+
+		__host__ __device__
+		T operator()( T in ) const
+		{
+			return in / sqrt( m_epsilonSquared+in*in );
+		};
+	private:
+		T m_epsilonSquared;
 	};
 
 protected:
