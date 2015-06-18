@@ -141,6 +141,7 @@ public:
 		{
 			thrust::adjacent_difference( in.begin(), in.end(), m_deviceVector.begin());
 			*(m_deviceVector.begin()) = 0; //for stability reason, we prefere a null difference at first place
+			//Last line is not very efficient, writting a proper functor implementing mirror boundary condition would be better
 		}
 		catch( thrust::system_error &e )
 		{
@@ -156,6 +157,7 @@ public:
 		{
 			thrust::transform( in.begin()+1, in.end(), in.begin(), m_deviceVector.begin(), thrust::minus<T>() );
 			*(m_deviceVector.end()-1) = 0; //for stability reason, we prefere a null difference at last place
+			//Last line is not very efficient, writting a proper functor implementing mirror boundary condition would be better
 		}
 		catch( thrust::system_error &e )
 		{
