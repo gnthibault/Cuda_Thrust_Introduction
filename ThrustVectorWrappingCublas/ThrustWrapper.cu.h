@@ -133,15 +133,32 @@ public:
 			exit(-1);
 		}
 	}
-	// FiniteDifference : compute Input[0]=m_dev[0] and Input[n] = m_dev[n]-m_dev[n-1]
+
+	/**************************************************************************************************************************************************
+	* __host__ __device__ OutputIterator thrust::adjacent_difference 	( 	const thrust::detail::execution_policy_base< DerivedPolicy > &  	exec,
+	*																		InputIterator  	first,
+	*																		InputIterator  	last,
+	*																		OutputIterator  	result
+	*																	)
+	*	adjacent_difference calculates the differences of adjacent elements in the range [first, last).
+	*	That is, *first is assigned to *result, and, for each iterator i in the range [first + 1, last),
+	*	the difference of *i and *(i - 1) is assigned to *(result + (i - first)).
+	*
+	*	Example: out(0) = in(0) // and // out(1)=in(1)-in(0) // and // out(n) = in(n)-in(n-1)
+	*	Matrix notation:
+	*
+	*	 1  0  0     a       a
+	*	-1  1  0     b   =  b-a
+	*	 0 -1  0     c      c-b
+	*
+	*	 We use this matrix definition in order to define backward difference as being its exact matrix adjoint
+	**************************************************************************************************************************************************/
 	void FiniteForwardDifference( const ThrustVectorWrapper<T>& Input )
 	{
 		const thrust::device_vector<T>& in = Input.GetConstDeviceVector();
 		try
 		{
-			thrust::adjacent_difference( in.begin(), in.end(), m_deviceVector.begin());
-			*(m_deviceVector.begin()) = 0; //for stability reason, we prefere a null difference at first place
-			//Last line is not very efficient, writting a proper functor implementing mirror boundary condition would be better
+			thrust::adjacent_difference( in.begin(), in.end(), this->m_deviceVector.begin());
 		}
 		catch( thrust::system_error &e )
 		{
@@ -155,9 +172,7 @@ public:
 		const thrust::device_vector<T>& in = Input.GetConstDeviceVector();
 		try
 		{
-			thrust::transform( in.begin()+1, in.end(), in.begin(), m_deviceVector.begin(), thrust::minus<T>() );
-			*(m_deviceVector.end()-1) = 0; //for stability reason, we prefere a null difference at last place
-			//Last line is not very efficient, writting a proper functor implementing mirror boundary condition would be better
+			thrust::adjacent_difference( in.rbegin(), in.rend(), this->m_deviceVector.rbegin());
 		}
 		catch( thrust::system_error &e )
 		{

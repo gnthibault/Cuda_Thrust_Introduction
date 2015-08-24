@@ -167,8 +167,8 @@ void testVariationalSignalDenoising()
 		grad.Substract( Y );								// grad = X - Y
 		TvGradientTmp.FiniteForwardDifference( X );			// TvGradient = G(X)
 		TvGradientTmp.ApplySmoothedTVGradient(epsilonNorm);	// TvGradient = TvGradient / ||TvGradient||e
-		TvGradient.FiniteBackwarDifference(TvGradientTmp);	// TvGradient = div( TvGradient / ||TvGradient||e )
-		grad.Saxpy( TvGradient, -lambda, false );			// grad = X - Y + GradientTV
+		TvGradient.FiniteBackwarDifference(TvGradientTmp);	// TvGradient = -div( TvGradient / ||TvGradient||e )
+		grad.Saxpy( TvGradient, +lambda, false );			// grad = X - Y + lambda * GradientTV
 		X.Saxpy( grad, -stepSize, false );					// Update solution
 
 		std::cout <<"Iteration : "<<niter<< " over " << nbIteration << std::endl;
